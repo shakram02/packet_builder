@@ -6,18 +6,14 @@ extern crate derive_new;
 extern crate ipnetwork;
 extern crate pnet;
 
-use ipnetwork::IpNetwork;
-use pnet::datalink::{Channel, NetworkInterface, MacAddr, DataLinkReceiver, DataLinkSender};
-use pnet::packet::{MutablePacket, Packet};
-use pnet::packet::arp::{ArpHardwareTypes, ArpOperation, ArpOperations};
+use pnet::datalink::{Channel, NetworkInterface, MacAddr};
+use pnet::packet::{Packet};
 use pnet::packet::ethernet::{EtherType, EtherTypes};
 use pnet::packet::ethernet::MutableEthernetPacket;
-use pnet::packet::ip::{self, IpNextHeaderProtocol, IpNextHeaderProtocols};
+use pnet::packet::ip::{IpNextHeaderProtocol, IpNextHeaderProtocols};
 use pnet::packet::ipv4::{self, MutableIpv4Packet};
-use pnet::packet::udp::{ipv4_checksum, MutableUdpPacket};
+use pnet::packet::udp::{MutableUdpPacket};
 
-use std::fs;
-use std::io::Read;
 use std::num::ParseIntError;
 use std::ops::Div;
 use pnet::datalink;
@@ -212,7 +208,8 @@ pub struct L2 {
 
 impl Ether {
     fn build_header_inner(&self, payload: &[u8], ether_type: Option<EtherType>) -> Vec<u8> {
-        let ether_buffer_len = payload.len() + 38; // 42 if with 802.1Q tags
+        //let ether_buffer_len = payload.len() + 38; // 42 if with 802.1Q tags
+        let ether_buffer_len = payload.len() + 14;
         let mut ether_buffer = vec![0u8; ether_buffer_len];
         let mut ether_packet = MutableEthernetPacket::new(&mut ether_buffer).unwrap();
 
@@ -242,10 +239,7 @@ impl PackageHeader<()> for Ether {
 
 impl PackageHeader<EtherType> for L2 {
     fn build_header(&self, payload: &[u8], ether_type: EtherType) -> Vec<u8> {
-        let l2_packet: Vec<u8> = vec![];
-        // Insert RLC function here for L2 packets
-
-        self.ether.build_header(&l2_packet, ether_type)
+        self.ether.build_header(&payload, ether_type)
     }
 }
 
@@ -284,7 +278,7 @@ impl PackageHeader<IpNextHeaderProtocol> for L3 {
         l3_packet.set_version(4);
         l3_packet.set_header_length(5);
         l3_packet.set_total_length(l3_len as u16);
-        l3_packet.set_ttl(1);
+        l3_packet.set_ttl(128);
         l3_packet.set_next_level_protocol(next_header);
 
         l3_packet.set_source(self.ip.src.parse().unwrap());
@@ -357,9 +351,6 @@ impl PackageHeader<()> for L3Over<Tcp> {
 
 impl PackageHeader<()> for L3Over<Udp> {
     fn build_header(&self, payload: &[u8], _extra: ()) -> Vec<u8> {
-        let l3_over_udp_packet: Vec<u8> = vec![];
-
-
         let udp_len = payload.len() + 8;
         let mut udp_buffer = vec![0u8; udp_len];
         let mut udp_packet = MutableUdpPacket::new(&mut udp_buffer).unwrap();
@@ -406,7 +397,7 @@ impl<H: PackageHeader<()>> Package<H> {
     }
 
     pub fn send(&self, session: &DataLinkSession) {
-        let (mut tx, mut rx) = match pnet::datalink::channel(&session.interface, Default::default()) {
+        let (mut tx, _rx) = match pnet::datalink::channel(&session.interface, Default::default()) {
             Ok(Channel::Ethernet(tx, rx)) => (tx, rx),
             Ok(_) => panic!("Unknown channel type"),
             Err(e) => panic!("Error happened {}", e),
@@ -415,7 +406,7 @@ impl<H: PackageHeader<()>> Package<H> {
     }
 
     pub fn recv(&self, session: &DataLinkSession) -> Vec<u8> {
-        let (mut tx, mut rx) = match pnet::datalink::channel(&session.interface, Default::default()) {
+        let (_tx, mut rx) = match pnet::datalink::channel(&session.interface, Default::default()) {
             Ok(Channel::Ethernet(tx, rx)) => (tx, rx),
             Ok(_) => panic!("Unknown channel type"),
             Err(e) => panic!("Error happened {}", e),
@@ -514,10 +505,6 @@ impl Mac {
 ///
 
 mod tests {
-    use Ether;
-    use Ip;
-    use Mac;
-    use Tcp;
 
     #[test]
   fn macro_ip_works() {
