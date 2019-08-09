@@ -146,8 +146,14 @@ pub struct Ip {
 
 #[derive(Clone, Debug, PartialEq, Eq, new)]
 pub struct Tcp {
-    pub dport: u16,
-    pub sport: u16,
+    pub src_port: u16,
+    pub dst_port: u16,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, new)]
+pub struct Udp {
+    pub src_port: u16,
+    pub dst_port: u16,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, new)]
@@ -325,13 +331,8 @@ pub trait Transport {}
 
 impl Transport for Tcp {}
 
-#[derive(Clone, Debug, PartialEq, Eq, new)]
-pub struct Udp {
-    pub src_port: u16,
-    pub dst_port: u16,
-}
-
 impl Transport for Udp {}
+
 
 #[derive(Clone, Debug, PartialEq, Eq, new)]
 pub struct L3Over<T: Transport> {
@@ -341,10 +342,15 @@ pub struct L3Over<T: Transport> {
 
 impl PackageHeader<()> for L3Over<Tcp> {
     fn build_header(&self, payload: &[u8], _extra: ()) -> Vec<u8> {
-        let l3_over_tcp_packet: Vec<u8> = vec![];
-        // Insert RLC function here for L3 over TCP packets
-        panic!("At the disco");
-        self.l3.build_header(&l3_over_tcp_packet, IpNextHeaderProtocols::Tcp)
+        let tcp_len = payload.len() + 20;
+        let mut tcp_buffer = vec![0u8; tcp_len];
+        let mut tcp_packet = MutableUdpPacket::new(&mut tcp_buffer).unwrap();
+
+        tcp_packet.set_source(self.transport.src_port);
+        tcp_packet.set_destination(self.transport.dst_port);
+        tcp_packet.set_length(tcp_len as u16);
+        tcp_packet.set_payload(payload);
+        self.l3.build_header(&tcp_packet.packet(), IpNextHeaderProtocols::Tcp)
     }
 }
 
@@ -442,6 +448,7 @@ payload_div!(Ether);
 //payload_div!(L2);
 //payload_div!(L3);
 payload_div!(L3Over<Udp>);
+payload_div!(L3Over<Tcp>);
 
 impl FromStr for Mac {
     type Err = ParseIntError;
@@ -505,15 +512,17 @@ impl Mac {
 ///
 
 mod tests {
+  #[cfg(test)]
+  use {Ip, Mac, Ether, Tcp};
 
-    #[test]
+  #[test]
   fn macro_ip_works() {
     assert_eq!(Ip {src: "".into(), dst: "hello".into()}, ip!(src="", dst="hello"));
   }
 
   #[test]
   fn macro_tcp_works() {
-    assert_eq!(Tcp {dport: 0, sport: 1}, tcp!(dport=0u16, sport=1u16));
+    assert_eq!(Tcp {dst_port: 0, src_port: 1}, tcp!(dst_port=0u16, src_port=1u16));
   }
 
   #[test]
@@ -529,7 +538,7 @@ mod tests {
 
   #[test]
   fn macro_tcp_ip_div_fv() {
-    assert_eq!(Ether {src_mac: [10,1,1,1,1,1].into(), dst_mac: [10,1,1,1,1,2].into()} / Ip {src: "".into(), dst: "hello".into()} / Tcp {dport: 0u16, sport: 1u16},
-               ether!(src_mac = [10,1,1,1,1,1], dst_mac = [10,1,1,1,1,2]) / ip!(src="", dst="hello")/tcp!(dport=0u16, sport=1u16));
+    assert_eq!(Ether {src_mac: [10,1,1,1,1,1].into(), dst_mac: [10,1,1,1,1,2].into()} / Ip {src: "".into(), dst: "hello".into()} / Tcp {dst_port: 0u16, src_port: 1u16},
+               ether!(src_mac = [10,1,1,1,1,1], dst_mac = [10,1,1,1,1,2]) / ip!(src="", dst="hello")/tcp!(dst_port=0u16, src_port=1u16));
   }
 }
