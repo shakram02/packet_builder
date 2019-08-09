@@ -6,7 +6,7 @@
 
 With `sendpacket` you can construct and modify arbitrary packet data and attempt to send it via a NIC, which uses `libpnet` under the covers.
 
-`sendpacket` should perform well, but is otherwise fundamentally a hackathon project: it exposes a somewhat hacky API, provides an incomplete set of functionality for general use, and the authors don't promise any level of maintenance.
+`sendpacket` wasn't being maintained so as an exercise in learning Rust I forked it.  Currently you can't do much but the example gives you an idea of how things work.  I'm planning to get TCP packet generation working and exposing additional fields at layers 2-4.
 
 ## Documentation
 
