@@ -1,6 +1,6 @@
 # sendpacket
 
-[![Crates.io - Sendpacket](https://img.shields.io/crates/v/sendpacket.svg)](https://crates.io/crates/sendpacket) [![Build Status](https://travis-ci.org/Metaswitch/sendpacket.svg?branch=master)](https://travis-ci.org/Metaswitch/sendpacket) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![Crates.io - Sendpacket](https://img.shields.io/crates/v/sendpacket.svg)](https://crates.io/crates/sendpacket) [![Build Status](https://travis-ci.org/hughesac/sendpacket.svg?branch=master)](https://travis-ci.org/hughesac/sendpacket) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
 `sendpacket` is a high-level rust library for low-level networking that makes use of macros to provide a "kwargs-like" interface a-la python's dpkt/scapy.
 
