@@ -11,7 +11,7 @@ pub mod udp;
 pub mod ethernet;
 pub mod ipv4;
 
-use pnet::packet::ipv4::{MutableIpv4Packet};
+use std::net::Ipv4Addr;
 /*
 use pnet::packet::{Packet};
 use pnet::packet::ethernet::{EtherType, EtherTypes};
@@ -27,36 +27,30 @@ use std::str::FromStr;
 */
 
 pub trait L4Checksum {
-  fn checksum_ipv4(&mut self, packet : &MutableIpv4Packet) -> ();
+  fn checksum_ipv4(&mut self, source: &Ipv4Addr, destination: &Ipv4Addr) -> ();
 }
 
-pub struct PayloadData {
-  pub data: Vec<u8>,
+pub struct PayloadData<'p> {
+  pub data: &'p mut[u8],
 }
 
 // Implement the pnet Packet trait so we can use the same interface in the macro for getting the
 // data.
-impl pnet_macros_support::packet::Packet for PayloadData {
+impl <'p>pnet_macros_support::packet::Packet for PayloadData<'p> {
     fn packet(& self) -> & [u8] { &self.data[..] }
     fn payload(& self) -> & [u8] { &self.data[..] }
 }
 
 #[macro_export]
 macro_rules! payload {
-   ($value:expr, $len:expr, $protocol:expr ) => {{
+   ($value:expr, $buf:expr) => {{
+     let buf_len = $buf.len();
      let pdata =  PayloadData {
-       data : $value,
+       data : &mut$buf[buf_len - $value.len()..],
      };
-     println!("building payload");
-     // The protocol element of the tuple is not actually used but the compiler requires us to
-     // provide a type.
-//     $pkt_layers.push(PacketTypes::Payload(pdata));
-     (pdata, None as Option<&u16>)
-   }};
-   ($value:expr) => {{
-     let pdata =  PayloadData {
-       data : $value,
-     };
+     for i in 0..$value.len() {
+      pdata.data[i] = $value[i];
+     }
      (pdata, None as Option<&u16>)
    }};
 }
@@ -83,26 +77,22 @@ macro_rules! build_channel {
 
 #[macro_export]
 macro_rules! sub_builder {
-    ($build_macro:ident($args:tt) $(/ $rem_macros:ident($rem_args:tt))+ ) => {{
-      let (mut payload_pkt, _payload_proto) = sub_builder!($($rem_macros($rem_args) )/ * );
-      //let payload_pkt = $pkt_layers.last().unwrap();
-      let (pkt, proto) = $build_macro!($args, payload_pkt, _payload_proto);
-//      let pkt = $pkt_layers.last_mut().unwrap();
-      //pkt.set_payload(payload_pkt.packet());
+    ($pkt_buf:expr, $build_macro:ident($args:tt) $(/ $rem_macros:ident($rem_args:tt))+) => {{
+      let (mut payload_pkt, _payload_proto) = sub_builder!($pkt_buf, $($rem_macros($rem_args) )/ *);
+      let (pkt, proto) = $build_macro!($args, payload_pkt, _payload_proto, $pkt_buf);
       (pkt, proto)
-    }};
-   ( $build_macro:ident($args:tt)) => {{
-      $build_macro!($args)
+    }}; 
+   ($pkt_buf:expr, $build_macro:ident($args:tt)) => {{
+      $build_macro!($args, $pkt_buf)
    }};
 }
 
 // Call the sub builder so we can return just the packet rather than the tuple that gets returned
 // by the sub builder for use during the recursion.
 #[macro_export]
-macro_rules! packet_builder2 {
-   ($( $rem_macros:ident($rem_args:tt))/ * ) => {{
-//    let mut pkt_layers : Vec<PacketTypes> = Vec::new();
-    let (pkt, _proto) = sub_builder!($( $rem_macros($rem_args) )/ *);
+macro_rules! packet_builder {
+   ($pkt_buf:expr, $( $rem_macros:ident($rem_args:tt))/ * ) => {{
+    let (pkt, _proto) = sub_builder!($pkt_buf, $( $rem_macros($rem_args) )/ *);
     pkt
    }};
 }
