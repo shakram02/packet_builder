@@ -3,7 +3,6 @@ use pnet::packet::udp::ipv4_checksum as ipv4_udp_checksum;
 use std::net::Ipv4Addr;
 use L4Checksum;
 
-
 impl <'p>L4Checksum for MutableUdpPacket<'p> {
   fn checksum_ipv4(&mut self, source: &Ipv4Addr, destination: &Ipv4Addr) -> () {
     self.set_checksum(ipv4_udp_checksum(&self.to_immutable(), source, destination));
@@ -25,5 +24,29 @@ macro_rules! udp {
       )*
       (pkt, pnet::packet::ip::IpNextHeaderProtocols::Udp)
    }};
+}
+
+#[cfg(test)]
+mod tests {
+   use pnet::packet::Packet;
+   use ::payload;
+   use payload::PayloadData;
+   use udp;
+
+   #[test]
+   fn macro_udp_basic() {
+      let mut buf = [0; 13];
+      let (pkt, proto) = udp!({set_source => 53, set_destination => 5353},
+        payload!({"hello".to_string().into_bytes()}, buf).0, None, buf);
+      assert_eq!(proto, pnet::packet::ip::IpNextHeaderProtocols::Udp);
+
+      let buf_expected = vec![0; 13];
+      let mut pkt_expected = pnet::packet::udp::MutableUdpPacket::owned(buf_expected).unwrap();
+      pkt_expected.set_destination(5353); 
+      pkt_expected.set_source(53); 
+      pkt_expected.set_length(13 as u16);
+      pkt_expected.set_payload(&"hello".to_string().into_bytes()); 
+      assert_eq!(pkt_expected.packet(), pkt.packet());
+   }
 }
 

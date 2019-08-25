@@ -10,51 +10,13 @@ pub mod tcp;
 pub mod udp;
 pub mod ethernet;
 pub mod ipv4;
+pub mod payload;
 
 use std::net::Ipv4Addr;
-/*
-use pnet::packet::{Packet};
-use pnet::packet::ethernet::{EtherType, EtherTypes};
-use pnet::packet::ethernet::MutableEthernetPacket;
-use pnet::packet::ip::{IpNextHeaderProtocol, IpNextHeaderProtocols};
-use pnet::packet::ipv4::{self, MutableIpv4Packet};
-use pnet::packet::udp::{MutableUdpPacket};
-
-use std::num::ParseIntError;
-use std::ops::Div;
-use pnet::datalink;
-use std::str::FromStr;
-*/
 
 pub trait L4Checksum {
   fn checksum_ipv4(&mut self, source: &Ipv4Addr, destination: &Ipv4Addr) -> ();
 }
-
-pub struct PayloadData<'p> {
-  pub data: &'p mut[u8],
-}
-
-// Implement the pnet Packet trait so we can use the same interface in the macro for getting the
-// data.
-impl <'p>pnet_macros_support::packet::Packet for PayloadData<'p> {
-    fn packet(& self) -> & [u8] { &self.data[..] }
-    fn payload(& self) -> & [u8] { &self.data[..] }
-}
-
-#[macro_export]
-macro_rules! payload {
-   ($value:expr, $buf:expr) => {{
-     let buf_len = $buf.len();
-     let pdata =  PayloadData {
-       data : &mut$buf[buf_len - $value.len()..],
-     };
-     for i in 0..$value.len() {
-      pdata.data[i] = $value[i];
-     }
-     (pdata, None as Option<&u16>)
-   }};
-}
-
 
 #[macro_export]
 macro_rules! build_channel {

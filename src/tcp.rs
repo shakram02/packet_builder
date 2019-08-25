@@ -26,3 +26,29 @@ macro_rules! tcp {
    }};
 }
 
+#[cfg(test)]
+mod tests {
+   use pnet::packet::Packet;
+   use ::payload;
+   use payload::PayloadData;
+   use tcp;
+
+   #[test]
+   fn macro_tcp_basic() {
+      let mut buf = [0; 37];
+      let (pkt, proto) = tcp!({set_source => 53, set_destination => 5353},
+        payload!({"hello".to_string().into_bytes()}, buf).0, None, buf);
+      assert_eq!(proto, pnet::packet::ip::IpNextHeaderProtocols::Tcp);
+
+      let buf_expected = vec![0; 37];
+      let mut pkt_expected = pnet::packet::tcp::MutableTcpPacket::owned(buf_expected).unwrap();
+      pkt_expected.set_destination(5353); 
+      pkt_expected.set_source(53); 
+      pkt_expected.set_data_offset(8);
+      pkt_expected.set_payload(&"hello".to_string().into_bytes()); 
+      pkt_expected.set_flags(pnet::packet::tcp::TcpFlags::SYN);
+      pkt_expected.set_window(65535);
+      assert_eq!(pkt_expected.packet(), pkt.packet());
+   }
+}
+

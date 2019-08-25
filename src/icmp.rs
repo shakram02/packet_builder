@@ -67,3 +67,26 @@ macro_rules! icmp {
 }
 
 
+#[cfg(test)]
+mod tests {
+   use pnet::packet::Packet;
+   use ::payload;
+   use payload::PayloadData;
+   use pnet::packet::icmp::{IcmpTypes};
+   use icmp;
+
+   #[test]
+   fn macro_icmp_basic() {
+      let mut buf = [0; 13];
+      let (pkt, proto) = icmp_dest_unreach!({set_icmp_type => IcmpTypes::DestinationUnreachable},
+        payload!({"hello".to_string().into_bytes()}, buf).0, None, buf);
+      assert_eq!(proto, pnet::packet::ip::IpNextHeaderProtocols::Icmp);
+
+      let buf_expected = vec![0; 13];
+      let mut pkt_expected = pnet::packet::icmp::destination_unreachable::MutableDestinationUnreachablePacket::owned(buf_expected).unwrap();
+      pkt_expected.set_icmp_type(IcmpTypes::DestinationUnreachable);
+      pkt_expected.set_payload(&"hello".to_string().into_bytes()); 
+      assert_eq!(pkt_expected.packet(), pkt.packet());
+   }
+}
+

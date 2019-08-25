@@ -3,6 +3,7 @@ extern crate pnet;
 extern crate pnet_base;
 
 use lib_sendpacket::*;
+use lib_sendpacket::payload::PayloadData;
 use pnet::packet::icmp::{IcmpTypes};
 //use pnet::packet::arp::{MutableArpPacket};
 use pnet::packet::Packet;
@@ -17,7 +18,7 @@ fn main() {
     let if_name = env::args().nth(1)
         .expect("Usage: ./sendpacket <interface name>");
 
-    let mut pkt_buf = vec![0; 1500];
+    let mut pkt_buf = [0u8; 1500];
     let pkt2 = packet_builder!(
          pkt_buf,
          ether({set_source => MacAddr(10,1,1,1,1,1)}) / 
