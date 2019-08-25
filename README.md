@@ -8,10 +8,6 @@ With `sendpacket` you can construct and modify arbitrary packet data and attempt
 
 `sendpacket` wasn't being maintained so as an exercise in learning Rust I forked it.  Currently you can't do much but the example gives you an idea of how things work.  I'm planning to get TCP packet generation working and exposing additional fields at layers 2-4.
 
-## Documentation
-
-https://docs.rs/sendpacket
-
 ## License
 
 Licensed under either of
