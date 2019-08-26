@@ -1,9 +1,9 @@
-extern crate lib_sendpacket;
+extern crate packet_builder;
 extern crate pnet;
 extern crate pnet_base;
 
-use lib_sendpacket::*;
-use lib_sendpacket::payload::PayloadData;
+use packet_builder::*;
+use packet_builder::payload::PayloadData;
 use pnet::packet::icmp::{IcmpTypes};
 //use pnet::packet::arp::{MutableArpPacket};
 use pnet::packet::Packet;

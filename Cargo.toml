@@ -1,23 +1,17 @@
 [package]
-name = "sendpacket"
-version = "0.1.1"
+name = "packet-builder"
+version = "0.1.0"
 description = "High-level library for interacting with low-level network data."
-homepage = "https://github.com/Metaswitch/sendpacket"
-repository = "https://github.com/Metaswitch/sendpacket"
+homepage = "https://github.com/hughesac/packet_builder"
+repository = "https://github.com/hughesac/packet_builder"
 license = "MIT OR Apache-2.0"
 authors = [
-  "Alex Lloyd <alex.lloyd@metaswitch.com>",
-  "Blake Hawkins <blake.hawkins@metaswitch.com>",
-  "Jaime Valdemoros Gomez <jaime.valdemorosgomez@metaswitch.com>",
-  "James Turner <james.turner@metaswitch.com>",
-  "Ryan Collingham <ryan.collingham@metaswitch.com>",
-  "Sophie Stratton <sophie.stratton@metaswitch.com>",
-  "Wojciech Kozlowski <wojciech.kozlowski@metaswitch.com>",
+  "Aaron Hughes <hughesac@gmail.com>",
 ]
+readme = "README.md"
+keywords = ["networking", "transport", "datalink", "packet", "protocol", "packet-crafting"]
+categories = ["network-programming"]
 
-[lib]
-name = "lib_sendpacket"
-path = "src/lib.rs"
 
 [dependencies]
 derive-new = "0.5"
