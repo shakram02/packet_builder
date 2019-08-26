@@ -15,6 +15,7 @@ With `sendpacket` you can construct and modify arbitrary packet data and attempt
 
 ## Examples
 All the macros are essentially wrappers around the packet structures and functions in libpnet so all the set functions for the various packet types within libpnet are valid.
+
 Generate a destination unreachable ICMP packet and send it
 ```rust
 let mut pkt_buf = [0u8; 1500];
