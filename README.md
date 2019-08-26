@@ -1,11 +1,11 @@
-# sendpacket
+# packet_builder
 [![Build Status](https://travis-ci.org/hughesac/sendpacket.svg?branch=master)](https://travis-ci.org/hughesac/sendpacket) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
-`sendpacket` is a high-level rust library for low-level networking that makes use of macros to provide a "kwargs-like" interface a-la python's dpkt/scapy.
+`packet_builder` is a high-level rust library for low-level networking that makes use of macros to provide a "kwargs-like" interface a-la python's dpkt/scapy.
 
-With `sendpacket` you can construct and modify arbitrary packet data and attempt to send it via a NIC, which uses `libpnet` under the covers.
+With `packet_builder` you can construct and modify arbitrary packet data and attempt to send it via a NIC, which uses `libpnet` under the covers.
 
-`sendpacket` wasn't being maintained so as an exercise in learning Rust I forked it.  Sane defaults are used for fields that aren't set by the caller and checksums are calculated for you.  Currently the following protocols are supported:
+[sendpacket](https://github.com/Metaswitch/sendpacket) wasn't being maintained so as an exercise in learning Rust I forked it to make `packet_builder`.  Sane defaults are used for fields that aren't set by the caller and checksums are calculated for you.  Currently the following protocols are supported:
 * Ethernet
 * IPv4
 * ICMP
@@ -13,7 +13,7 @@ With `sendpacket` you can construct and modify arbitrary packet data and attempt
 * TCP
 
 ## Examples
-All the macros are essentially wrappers around the packet structures and functions in libpnet so all the set functions for the various packet types within libpnet are valid.
+All the macros are essentially wrappers around the packet structures and functions in libpnet so all the set functions for the various packet types within libpnet are valid.  See the examples directory for complete examples.
 
 Generate a destination unreachable ICMP packet and send it
 ```rust
@@ -29,7 +29,7 @@ let pkt = packet_builder!(
 );
 
 let if_name = env::args().nth(1)
-    .expect("Usage: ./sendpacket <interface name>");
+    .expect("Usage: ./packet_builder <interface name>");
 let (mut sender, _receiver) = build_channel!(if_name);
 sender.send_to(pkt.packet(), None).unwrap().unwrap();
 ```
