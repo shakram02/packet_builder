@@ -11,6 +11,7 @@ pub fn init_ipv4_pkt(pkt: &mut MutableIpv4Packet, len: u16) -> () {
   pkt.set_ttl(128);
   // TODO make the ID a random value
   pkt.set_identification(256);
+  pkt.set_fragment_offset(0);
   pkt.set_flags(pnet::packet::ipv4::Ipv4Flags::DontFragment);
 }
 

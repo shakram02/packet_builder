@@ -18,6 +18,9 @@ macro_rules! tcp {
       let mut pkt = pnet::packet::tcp::MutableTcpPacket::new(&mut $buf[buf_len - total_len..]).unwrap();
       pkt.set_data_offset(8);
       pkt.set_flags(pnet::packet::tcp::TcpFlags::SYN);
+      pkt.set_sequence(0);
+      pkt.set_acknowledgement(0);
+      pkt.set_urgent_ptr(0);
       pkt.set_window(65535);
       $(
         pkt.$func($value);
@@ -47,6 +50,9 @@ mod tests {
       pkt_expected.set_data_offset(8);
       pkt_expected.set_payload(&"hello".to_string().into_bytes()); 
       pkt_expected.set_flags(pnet::packet::tcp::TcpFlags::SYN);
+      pkt_expected.set_sequence(0);
+      pkt_expected.set_acknowledgement(0);
+      pkt_expected.set_urgent_ptr(0);
       pkt_expected.set_window(65535);
       assert_eq!(pkt_expected.packet(), pkt.packet());
    }
