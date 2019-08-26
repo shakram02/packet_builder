@@ -7,11 +7,11 @@
 With `sendpacket` you can construct and modify arbitrary packet data and attempt to send it via a NIC, which uses `libpnet` under the covers.
 
 `sendpacket` wasn't being maintained so as an exercise in learning Rust I forked it.  Sane defaults are used for fields that aren't set by the caller and checksums are calculated for you.  Currently the following protocols are supported:
-1) Ethernet
-2) IPv4
-3) ICMP
-4) UDP
-5) TCP
+* Ethernet
+* IPv4
+* ICMP
+* UDP
+* TCP
 
 ## Examples
 Generate a destination unreachable ICMP packet and send it
