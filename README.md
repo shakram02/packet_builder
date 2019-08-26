@@ -6,7 +6,65 @@
 
 With `sendpacket` you can construct and modify arbitrary packet data and attempt to send it via a NIC, which uses `libpnet` under the covers.
 
-`sendpacket` wasn't being maintained so as an exercise in learning Rust I forked it.  Currently you can't do much but the example gives you an idea of how things work.  I'm planning to get TCP packet generation working and exposing additional fields at layers 2-4.
+`sendpacket` wasn't being maintained so as an exercise in learning Rust I forked it.  Sane defaults are used for fields that aren't set by the caller and checksums are calculated for you.  Currently the following protocols are supported:
+1) Ethernet
+2) IPv4
+3) ICMP
+4) UDP
+5) TCP
+
+## Examples
+Generate a destination unreachable ICMP packet and send it
+```rust
+let mut pkt_buf = [0u8; 1500];
+let pkt = packet_builder!(
+     pkt_buf,
+     ether({set_source => MacAddr(10,1,1,1,1,1)}) / 
+     ipv4({set_source => ipv4addr!("127.0.0.1"), set_destination => ipv4addr!("127.0.0.1") }) /
+     icmp_dest_unreach({set_icmp_type => IcmpTypes::DestinationUnreachable}) / 
+     ipv4({set_source => ipv4addr!("10.8.0.1"), set_destination => ipv4addr!("127.0.0.1") }) /
+     udp({set_source => 53, set_destination => 5353}) /
+     payload({"hello".to_string().into_bytes()})
+);
+
+let if_name = env::args().nth(1)
+    .expect("Usage: ./sendpacket <interface name>");
+let (mut sender, _receiver) = build_channel!(if_name);
+sender.send_to(pkt.packet(), None).unwrap().unwrap();
+```
+Generate a TCP PSH|ACK packet with data
+```rust
+let mut pkt_buf = [0u8; 1500];
+let pkt = packet_builder!(
+     pkt_buf,
+     ether({set_destination => MacAddr(1,2,3,4,5,6), set_source => MacAddr(10,1,1,1,1,1)}) / 
+     ipv4({set_source => ipv4addr!("127.0.0.1"), set_destination => ipv4addr!("127.0.0.1") }) /
+     tcp({set_source => 43455, set_destination => 80, set_flags => (TcpFlags::PSH | TcpFlags::ACK)}) /
+     payload({"hello".to_string().into_bytes()})
+);
+```
+Generate a UDP packet with data
+```rust
+let mut pkt_buf = [0u8; 1500];
+let pkt = packet_builder!(
+     pkt_buf,
+     ether({set_destination => MacAddr(1,2,3,4,5,6), set_source => MacAddr(10,1,1,1,1,1)}) / 
+     ipv4({set_source => ipv4addr!("127.0.0.1"), set_destination => ipv4addr!("127.0.0.1") }) /
+     udp({set_source => 12312, set_destination => 143}) /
+     payload({"hello".to_string().into_bytes()})
+);
+```
+Generate an ICMP Echo Request packet
+```rust
+let mut pkt_buf = [0u8; 1500];
+let pkt = packet_builder!(
+     pkt_buf,
+     ether({set_destination => MacAddr(1,2,3,4,5,6), set_source => MacAddr(10,1,1,1,1,1)}) / 
+     ipv4({set_source => ipv4addr!("127.0.0.1"), set_destination => ipv4addr!("127.0.0.1") }) /
+     icmp_echo_req({set_icmp_type => IcmpTypes::EchoRequest}) / 
+     payload({"hello".to_string().into_bytes()})
+);
+```
 
 ## License
 
