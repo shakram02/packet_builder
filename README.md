@@ -1,6 +1,6 @@
 # packet_builder
 [![Crates.io - packet_builder](https://img.shields.io/crates/v/packet_builder.svg)](https://crates.io/crates/packet_builder)
-[![Build Status](https://travis-ci.org/hughesac/sendpacket.svg?branch=master)](https://travis-ci.org/hughesac/sendpacket) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![Build Status](https://travis-ci.org/hughesac/sendpacket.svg?branch=master)](https://travis-ci.org/hughesac/packet_builder) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
 `packet_builder` is a high-level rust library for low-level networking that makes use of macros to provide a "kwargs-like" interface a-la python's dpkt/scapy.
 
