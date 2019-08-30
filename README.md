@@ -2,7 +2,7 @@
 [![Crates.io - packet_builder](https://img.shields.io/crates/v/packet_builder.svg)](https://crates.io/crates/packet_builder)
 [![Build Status](https://travis-ci.org/hughesac/packet_builder.svg?branch=master)](https://travis-ci.org/hughesac/packet_builder) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-green.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
-`packet_builder` is a high-level rust library for low-level networking that makes use of macros to provide a "kwargs-like" interface a-la python's dpkt/scapy.
+[packet_builder](https://github.com/hughesac/packet_builder) is a high-level rust library for low-level networking that makes use of macros to provide a "kwargs-like" interface a-la python's dpkt/scapy.
 
 With `packet_builder` you can construct and modify arbitrary packet data and attempt to send it via a NIC, which uses `libpnet` under the covers.
 
@@ -43,6 +43,17 @@ let pkt = packet_builder!(
      ipv4({set_source => ipv4addr!("127.0.0.1"), set_destination => ipv4addr!("127.0.0.1") }) /
      tcp({set_source => 43455, set_destination => 80, set_flags => (TcpFlags::PSH | TcpFlags::ACK)}) /
      payload({"hello".to_string().into_bytes()})
+);
+```
+Generate a TCP SYN packet with mss and wscale options specified
+```rust     
+let mut pkt_buf = [0u8; 1500];
+let pkt = packet_builder!(
+   pkt_buf,
+   ether({set_destination => MacAddr(1,2,3,4,5,6), set_source => MacAddr(10,1,1,1,1,1)}) / 
+   ipv4({set_source => ipv4addr!("192.168.1.1"), set_destination => ipv4addr!("127.0.0.1") }) /
+   tcp({set_source => 43455, set_destination => 80, set_options => &[TcpOption::mss(1200), TcpOption::wscale(2)]}) /
+   payload({"hello".to_string().into_bytes()})
 );
 ```
 Generate a UDP packet with data
