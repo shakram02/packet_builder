@@ -15,6 +15,20 @@ pub fn init_ipv4_pkt(pkt: &mut MutableIpv4Packet, len: u16) -> () {
   pkt.set_flags(pnet::packet::ipv4::Ipv4Flags::DontFragment);
 }
 
+#[macro_export]
+macro_rules! extract_address {
+  (set_source, $value:expr) => {{
+    $value
+  }};
+  (set_destination, $value:expr) => {{
+    $value
+  }};
+  ($func:ident, $value:expr) => {{
+    println!("Unexpected case matched in extract_address: {} {}", stringify!($func), stringify!($value));
+    ipv4::DEFAULT_SOURCE
+  }};
+}
+
 
 #[macro_export]
 macro_rules! ipv4 {
@@ -27,9 +41,13 @@ macro_rules! ipv4 {
       // creating the MutableIpv4Packet which is another mutable reference to the packet buffer.
       // Once the MutableIpv4Packet is created we can't use $l4_pkt or we will get borrow errors.
       $(
+        // If we only used this match without calling the extract_address macro, the compiler can't
+        // determine which func/value combos apply to which branch of the match and it assume they
+        // can all match which will cause type errors.  The extract_address macro avoids this
+        // problem.
         match stringify!($func) {
-          "set_source" => source = $value,
-          "set_destination" => dest = $value,
+          "set_source" => source = extract_address!($func, $value),
+          "set_destination" => dest = extract_address!($func, $value),
           _ => (),
         }
       )*
@@ -68,7 +86,7 @@ mod tests {
    #[test]
    fn macro_ipv4_basic() {
       let mut buf = [0; 25];
-      let (pkt, proto) = ipv4!({set_source => ipv4addr!("127.0.0.1"), set_destination => ipv4addr!("192.168.1.1")},
+      let (pkt, proto) = ipv4!({set_source => ipv4addr!("127.0.0.1"), set_destination => ipv4addr!("192.168.1.1"), set_version => 4},
         payload!({"hello".to_string().into_bytes()}, buf).0, pnet::packet::ip::IpNextHeaderProtocols::Udp, buf);
       assert_eq!(proto, Ipv4);
 
