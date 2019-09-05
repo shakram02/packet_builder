@@ -45,7 +45,7 @@ let pkt = packet_builder!(
      payload({"hello".to_string().into_bytes()})
 );
 ```
-Generate a TCP SYN packet with mss and wscale options specified
+Generate a TCP SYN packet with mss and wscale options specified over VLAN ID 10
 ```rust     
 let mut pkt_buf = [0u8; 1500];
 let pkt = packet_builder!(
