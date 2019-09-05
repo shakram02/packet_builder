@@ -10,8 +10,6 @@ macro_rules! ether {
       $(
         pkt.$func($value);
       )*
-//      $pkt_layers.push(PacketTypes::EtherPkt(pkt));
-      //pkt.set_payload($payload_pkt.packet());
       // The protocol element of the tuple is not actually used but the compiler requires us to
       // provide a type.
      (pkt, None as Option<&u16>)

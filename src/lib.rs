@@ -10,6 +10,7 @@ pub mod tcp;
 pub mod udp;
 pub mod ethernet;
 pub mod arp;
+pub mod vlan;
 pub mod ipv4;
 pub mod payload;
 
