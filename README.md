@@ -50,10 +50,11 @@ Generate a TCP SYN packet with mss and wscale options specified
 let mut pkt_buf = [0u8; 1500];
 let pkt = packet_builder!(
    pkt_buf,
-   ether({set_destination => MacAddr(1,2,3,4,5,6), set_source => MacAddr(10,1,1,1,1,1)}) / 
+   ether({set_destination => MacAddr(1,2,3,4,5,6), set_source => MacAddr(10,1,1,1,1,1)}) /
+   vlan({set_vlan_identifier => 10}) /
    ipv4({set_source => ipv4addr!("192.168.1.1"), set_destination => ipv4addr!("127.0.0.1") }) /
    tcp({set_source => 43455, set_destination => 80, set_options => &[TcpOption::mss(1200), TcpOption::wscale(2)]}) /
-   payload({"hello".to_string().into_bytes()})
+   payload({[0; 0]})
 );
 ```
 Generate a UDP packet with data
