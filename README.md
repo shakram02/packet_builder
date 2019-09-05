@@ -8,6 +8,8 @@ With `packet_builder` you can construct and modify arbitrary packet data and att
 
 [sendpacket](https://github.com/Metaswitch/sendpacket) wasn't being maintained so as an exercise in learning Rust I forked it to make `packet_builder`.  Sane defaults are used for fields that aren't set by the caller and checksums are calculated for you.  Currently the following protocols are supported:
 * Ethernet
+* ARP
+* 802.1Q
 * IPv4
 * ICMP
 * UDP
